@@ -19,23 +19,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: QuoteGarden/package-lock.json
-
-      - name: Install project dependencies
-        working-directory: QuoteGarden
-        run: npm ci
-
-      - name: Install jq for webhook script
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      - name: Verify Goose CLI is available
-        run: /home/xgrid/.local/bin/goose --version
-
       - name: Run Test Coverage Recipe
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -77,14 +60,21 @@ jobs:
         if: always()
         run: |
           if [ -f test_report.json ]; then
+            DEPLOY_STATUS=$(grep -o '"status"[[:space:]]*:[[:space:]]*"[^"]*"' test_report.json | head -1 | sed 's/.*"\([^"]*\)".*/\1/')
+            COV_BEFORE=$(grep -o '"before_percentage"[[:space:]]*:[[:space:]]*[0-9.]*' test_report.json | sed 's/.*:[[:space:]]*//')
+            COV_AFTER=$(grep -o '"after_percentage"[[:space:]]*:[[:space:]]*[0-9.]*' test_report.json | sed 's/.*:[[:space:]]*//')
+            IMPROVE=$(grep -o '"improvement"[[:space:]]*:[[:space:]]*[0-9.]*' test_report.json | sed 's/.*:[[:space:]]*//')
+            QUAL_SCORE=$(grep -o '"quality_score"[[:space:]]*:[[:space:]]*[0-9.]*' test_report.json | sed 's/.*:[[:space:]]*//')
+            TESTS_NUM=$(grep -o '"total_tests_added"[[:space:]]*:[[:space:]]*[0-9]*' test_report.json | sed 's/.*:[[:space:]]*//')
+
             echo "## Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Deployment Status:** $(jq -r '.deployment_recommendation.status' test_report.json)" >> $GITHUB_STEP_SUMMARY
-            echo "**Coverage Before:** $(jq -r '.final_coverage_estimate.before_percentage' test_report.json)%" >> $GITHUB_STEP_SUMMARY
-            echo "**Coverage After:** $(jq -r '.final_coverage_estimate.after_percentage' test_report.json)%" >> $GITHUB_STEP_SUMMARY
-            echo "**Improvement:** +$(jq -r '.final_coverage_estimate.improvement' test_report.json)%" >> $GITHUB_STEP_SUMMARY
-            echo "**Quality Score:** $(jq -r '.overall_score.quality_score' test_report.json)/10" >> $GITHUB_STEP_SUMMARY
-            echo "**Tests Added:** $(jq -r '.tests_written.total_tests_added' test_report.json)" >> $GITHUB_STEP_SUMMARY
+            echo "**Deployment Status:** $DEPLOY_STATUS" >> $GITHUB_STEP_SUMMARY
+            echo "**Coverage Before:** ${COV_BEFORE}%" >> $GITHUB_STEP_SUMMARY
+            echo "**Coverage After:** ${COV_AFTER}%" >> $GITHUB_STEP_SUMMARY
+            echo "**Improvement:** +${IMPROVE}%" >> $GITHUB_STEP_SUMMARY
+            echo "**Quality Score:** ${QUAL_SCORE}/10" >> $GITHUB_STEP_SUMMARY
+            echo "**Tests Added:** $TESTS_NUM" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️ Test report not generated" >> $GITHUB_STEP_SUMMARY
           fi
