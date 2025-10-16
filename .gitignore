@@ -32,3 +32,14 @@ yarn-error.log*
 # Temporary files
 *.tmp
 .cache/
+.claude/
+.cursor/
+.cursorrules/
+.cursorrules.yaml/
+.cursorrules.yml/
+.cursorrules.json/
+.cursorrules.jsonc/
+.cursorrules.json5/
+.cursorrules.jsonp/
+.cursorrules.jsonp5/
+.cursorrules.jsonp5/
