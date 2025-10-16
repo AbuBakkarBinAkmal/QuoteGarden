@@ -1,85 +1,21 @@
-name: Test Coverage Analysis
+name: Test Coverage
 
 on:
   push:
-    branches: ['*']
-    paths:
-      - 'QuoteGarden/**'
-      - 'recipe.yaml'
-      - '.github/workflows/test-coverage.yml'
-  pull_request:
-    branches: ['*']
-  workflow_dispatch:
+    branches:
+      - '**'
 
 jobs:
-  analyze-coverage:
+  run-coverage:
     runs-on: self-hosted
 
+    defaults:
+      run:
+        working-directory: /home/xgrid/GooseTest
+
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Test Coverage Recipe
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          TETRATE_API_KEY: ${{ secrets.TETRATE_API_KEY }}
-        timeout-minutes: 15
-        run: |
-          # Run goose and capture output
-          timeout 900 /home/xgrid/.local/bin/goose run \
-            --recipe recipe.yaml \
-            --params project_directory=QuoteGarden \
-            --provider tetrate \
-            --model gpt-5 \
-            --no-session \
-            --quiet 2>&1 | tee goose_output.log
-
-          # Extract JSON from output (last valid JSON object)
-          grep -o '{.*}' goose_output.log | tail -1 | jq . > test_report.json 2>/dev/null || echo '{"error": "Failed to parse JSON from goose output"}' > test_report.json
-
-      - name: Upload test report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-coverage-report
-          path: test_report.json
-          retention-days: 30
-
-      - name: Check test report exists
-        id: check_report
-        run: |
-          if [ -f test_report.json ]; then
-            echo "report_exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "report_exists=false" >> $GITHUB_OUTPUT
-            echo "⚠️ Warning: test_report.json was not generated"
-          fi
-
-      - name: Send Google Chat notification
-        if: steps.check_report.outputs.report_exists == 'true'
-        run: |
-          chmod +x send_webhook.sh
-          ./send_webhook.sh test_report.json
-
-      - name: Display test summary
-        if: always()
-        run: |
-          if [ -f test_report.json ]; then
-            DEPLOY_STATUS=$(grep -o '"status"[[:space:]]*:[[:space:]]*"[^"]*"' test_report.json | head -1 | sed 's/.*"\([^"]*\)".*/\1/')
-            COV_BEFORE=$(grep -o '"before_percentage"[[:space:]]*:[[:space:]]*[0-9.]*' test_report.json | sed 's/.*:[[:space:]]*//')
-            COV_AFTER=$(grep -o '"after_percentage"[[:space:]]*:[[:space:]]*[0-9.]*' test_report.json | sed 's/.*:[[:space:]]*//')
-            IMPROVE=$(grep -o '"improvement"[[:space:]]*:[[:space:]]*[0-9.]*' test_report.json | sed 's/.*:[[:space:]]*//')
-            QUAL_SCORE=$(grep -o '"quality_score"[[:space:]]*:[[:space:]]*[0-9.]*' test_report.json | sed 's/.*:[[:space:]]*//')
-            TESTS_NUM=$(grep -o '"total_tests_added"[[:space:]]*:[[:space:]]*[0-9]*' test_report.json | sed 's/.*:[[:space:]]*//')
-
-            echo "## Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Deployment Status:** $DEPLOY_STATUS" >> $GITHUB_STEP_SUMMARY
-            echo "**Coverage Before:** ${COV_BEFORE}%" >> $GITHUB_STEP_SUMMARY
-            echo "**Coverage After:** ${COV_AFTER}%" >> $GITHUB_STEP_SUMMARY
-            echo "**Improvement:** +${IMPROVE}%" >> $GITHUB_STEP_SUMMARY
-            echo "**Quality Score:** ${QUAL_SCORE}/10" >> $GITHUB_STEP_SUMMARY
-            echo "**Tests Added:** $TESTS_NUM" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "⚠️ Test report not generated" >> $GITHUB_STEP_SUMMARY
-          fi
+      - name: Run Goose recipe
+        run: goose run --recipe recipe.yaml --no-session
