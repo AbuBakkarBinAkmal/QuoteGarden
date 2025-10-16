@@ -1,0 +1,94 @@
+name: Test Coverage Analysis
+
+on:
+  push:
+    branches: ['*']
+    paths:
+      - 'QuoteGarden/**'
+      - 'recipe.yaml'
+      - '.github/workflows/test-coverage.yml'
+  pull_request:
+    branches: ['*']
+  workflow_dispatch:
+
+jobs:
+  analyze-coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: QuoteGarden/package-lock.json
+
+      - name: Install project dependencies
+        working-directory: QuoteGarden
+        run: npm ci
+
+      - name: Install Goose CLI
+        run: |
+          curl -fsSL https://github.com/block/goose/releases/latest/download/goose-linux-x86_64 -o goose
+          chmod +x goose
+          sudo mv goose /usr/local/bin/goose
+          goose --version
+
+      - name: Install jq for webhook script
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Run Test Coverage Recipe
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TETRATE_API_KEY: ${{ secrets.TETRATE_API_KEY }}
+        run: |
+          goose run \
+            --recipe recipe.yaml \
+            --params project_directory=QuoteGarden \
+            --provider tetrate \
+            --model gpt-5-mini \
+            --with-builtin developer \
+            --no-session
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-coverage-report
+          path: test_report.json
+          retention-days: 30
+
+      - name: Check test report exists
+        id: check_report
+        run: |
+          if [ -f test_report.json ]; then
+            echo "report_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "report_exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Warning: test_report.json was not generated"
+          fi
+
+      - name: Send Google Chat notification
+        if: steps.check_report.outputs.report_exists == 'true'
+        run: |
+          chmod +x send_webhook.sh
+          ./send_webhook.sh test_report.json
+
+      - name: Display test summary
+        if: always()
+        run: |
+          if [ -f test_report.json ]; then
+            echo "## Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Deployment Status:** $(jq -r '.deployment_recommendation.status' test_report.json)" >> $GITHUB_STEP_SUMMARY
+            echo "**Coverage Before:** $(jq -r '.final_coverage_estimate.before_percentage' test_report.json)%" >> $GITHUB_STEP_SUMMARY
+            echo "**Coverage After:** $(jq -r '.final_coverage_estimate.after_percentage' test_report.json)%" >> $GITHUB_STEP_SUMMARY
+            echo "**Improvement:** +$(jq -r '.final_coverage_estimate.improvement' test_report.json)%" >> $GITHUB_STEP_SUMMARY
+            echo "**Quality Score:** $(jq -r '.overall_score.quality_score' test_report.json)/10" >> $GITHUB_STEP_SUMMARY
+            echo "**Tests Added:** $(jq -r '.tests_written.total_tests_added' test_report.json)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Test report not generated" >> $GITHUB_STEP_SUMMARY
+          fi

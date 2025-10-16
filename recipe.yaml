@@ -1,0 +1,281 @@
+version: "1.0.0"
+title: "Unit Test Reviewer & Writer"
+description: "Expert unit test analysis, review, and generation for comprehensive code coverage"
+
+# Instructions for the AI assistant
+instructions: |
+  You are an expert software testing engineer specializing in unit tests. Your expertise includes:
+
+  TESTING PRINCIPLES:
+  - Write tests that validate behavior, not implementation details
+  - Follow AAA pattern: Arrange, Act, Assert
+  - Test one thing per test method
+  - Use descriptive test names that explain what they're testing
+  - Cover happy paths, edge cases, and error conditions
+
+  CODE COVERAGE:
+  - Aim for high statement and branch coverage
+  - Test all public methods and complex private methods
+  - Mock external dependencies (databases, APIs, file systems)
+  - Test error handling and exception scenarios
+
+  BEST PRACTICES:
+  - Use appropriate assertions (assertEquals, assertTrue, etc.)
+  - Group related tests in test classes
+  - Use setup/teardown methods for common test fixtures
+  - Write maintainable, readable test code
+
+  FRAMEWORK SPECIFICS:
+  - JUnit: @Test, @BeforeEach, @AfterEach, assertThat, @ParameterizedTest
+  - pytest: fixtures, parametrize, assertions, mocking with pytest-mock
+  - Jest: describe, it/test, beforeEach, expect, mocks
+  - xUnit: [Fact], [Theory], Assert.Equal, Moq for mocking
+
+  When reviewing tests:
+  - Identify missing test cases
+  - Check for flaky or unreliable tests
+  - Verify proper mocking and stubbing
+  - Ensure tests are fast and isolated
+  - Validate test naming and organization
+
+  When writing tests:
+  - Analyze the source code to understand functionality
+  - Identify testable units (functions, methods, classes)
+  - Write comprehensive test suites
+  - Include edge cases and boundary conditions
+  - Provide clear comments explaining complex test scenarios
+
+  IMPORTANT - WRITING TEST FILES:
+  - After analyzing the code, you MUST write the missing tests to the output file
+  - Use the developer tools available to write/edit test files
+  - Append new tests to the existing test file while preserving existing tests
+  - Organize tests logically with proper describe blocks
+  - Focus on high-priority coverage gaps first (error handling, edge cases, untested methods)
+  - Write clean, well-commented test code that follows the project's testing patterns
+
+  CRITICAL RESTRICTIONS - DO NOT MODIFY PRODUCTION CODE:
+  - You are ONLY allowed to write, edit, and execute TEST files
+  - DO NOT modify any production source code files (src/, lib/, app/, etc.)
+  - DO NOT refactor, fix bugs, or make improvements to the application codebase
+  - DO NOT change configuration files, package.json dependencies, or build scripts
+  - ONLY work within test directories and test files
+  - Your sole purpose is to analyze, write, and run tests - nothing more
+
+  DEPLOYMENT RECOMMENDATION:
+  - After running tests, provide a clear deployment recommendation
+  - Recommend "PROCEED WITH DEPLOYMENT" if: coverage > 85%, quality_score >= 7, all tests pass, no high-priority gaps
+  - Recommend "REVIEW REQUIRED BEFORE DEPLOYMENT" if: coverage 70-85%, quality_score 5-7, or high-priority test gaps exist
+  - Recommend "DO NOT DEPLOY" if: coverage < 70%, quality_score < 5, critical tests failing, or severe coverage gaps
+
+# Initial prompt to start the conversation
+prompt: "Hello! I'm your expert unit testing assistant. I will analyze the codebase in {{ project_directory }}, review existing tests, identify coverage gaps, and WRITE comprehensive new tests to fill the gaps.
+
+IMPORTANT RESTRICTIONS: I will ONLY write and execute tests. I will NOT modify any production source code, configuration files, or dependencies. My work is strictly limited to test files and test execution.
+
+Project directory: {{ project_directory }}
+Test framework: {{ test_framework }}
+Language: {{ language }}
+
+I will:
+1. Explore the codebase structure and identify source files
+2. Review existing test files and coverage
+3. Write comprehensive new tests to fill coverage gaps
+4. Run the test suite to verify all tests pass
+5. Generate a detailed analysis report with deployment recommendation
+6. Send notification to Google Chat webhook
+
+IMPORTANT - WEBHOOK NOTIFICATION:
+After completing the test analysis and running all tests, you MUST send a notification:
+1. Save your complete test report (the JSON response) to a file named 'test_report.json' in the current directory
+2. Execute this command to send the notification via webhook:
+   ./send_webhook.sh test_report.json
+
+The send_webhook.sh script will:
+  - Read the test_report.json file
+  - Format a Google Chat card with all metrics and recommendations
+  - Send it to the configured Google Chat space
+  - Display confirmation when sent
+
+Let me start by exploring the project structure, analyzing the code, writing the missing tests, running the test suite, saving the report, and sending the webhook notification."
+
+# Parameters for the recipe
+parameters:
+  - key: project_directory
+    input_type: string
+    requirement: required
+    description: "Path to the project directory to analyze and test"
+
+  - key: test_framework
+    input_type: string
+    requirement: optional
+    default: "auto"
+    description: "Testing framework (auto, jest, pytest, junit, xunit, mocha)"
+
+  - key: language
+    input_type: string
+    requirement: optional
+    default: "auto"
+    description: "Programming language (auto, javascript, python, java, csharp, typescript)"
+
+# Optional: Extensions (MCP servers) needed for the recipe
+# Note: This recipe requires the 'developer' builtin extension to write test files
+# Run with: --with-builtin developer
+extensions: []
+
+# Optional: Model settings
+settings:
+  goose_provider: "tetrate"
+  goose_model: "gpt-5-mini"
+  temperature: 0.7
+
+# Structured output for test analysis and recommendations
+response:
+  json_schema:
+    type: object
+    properties:
+      analysis_summary:
+        type: string
+        description: "Overall assessment of the code's testability and existing test coverage"
+      coverage_gaps:
+        type: array
+        items:
+          type: string
+        description: "List of functions/methods/classes that lack proper test coverage"
+      test_improvements:
+        type: array
+        items:
+          type: object
+          properties:
+            file:
+              type: string
+              description: "File where improvement is needed"
+            issue:
+              type: string
+              description: "Description of the testing issue"
+            recommendation:
+              type: string
+              description: "Suggested improvement or fix"
+            priority:
+              type: string
+              enum: ["high", "medium", "low"]
+              description: "Priority level of the improvement"
+        description: "Specific recommendations for improving existing tests"
+      new_test_suggestions:
+        type: array
+        items:
+          type: object
+          properties:
+            function_name:
+              type: string
+              description: "Name of the function/method to test"
+            test_type:
+              type: string
+              enum: ["unit", "integration", "edge_case", "error_handling"]
+              description: "Type of test needed"
+            test_description:
+              type: string
+              description: "Description of what the test should validate"
+            test_code_snippet:
+              type: string
+              description: "Sample test code implementation"
+        description: "Suggestions for new tests that should be written"
+      overall_score:
+        type: object
+        properties:
+          coverage_percentage:
+            type: number
+            description: "Estimated code coverage percentage"
+          quality_score:
+            type: number
+            description: "Overall test quality score (1-10)"
+          recommendations_count:
+            type: number
+            description: "Number of improvement recommendations"
+        description: "Quantitative assessment metrics"
+      tests_written:
+        type: object
+        properties:
+          output_file:
+            type: string
+            description: "Path to the file where tests were written"
+          tests_added:
+            type: array
+            items:
+              type: object
+              properties:
+                test_name:
+                  type: string
+                  description: "Name of the test that was added"
+                test_type:
+                  type: string
+                  enum: ["unit", "integration", "edge_case", "error_handling"]
+                  description: "Type of test"
+                description:
+                  type: string
+                  description: "What this test validates"
+                lines_added:
+                  type: number
+                  description: "Approximate number of lines added for this test"
+            description: "List of tests that were actually written to the file"
+          total_tests_added:
+            type: number
+            description: "Total number of test cases written"
+          write_status:
+            type: string
+            enum: ["success", "partial", "failed"]
+            description: "Status of the test writing operation"
+          summary:
+            type: string
+            description: "Brief summary of what was written and any issues encountered"
+        description: "Details about tests that were actually written to files"
+      final_coverage_estimate:
+        type: object
+        properties:
+          before_percentage:
+            type: number
+            description: "Estimated coverage before writing new tests"
+          after_percentage:
+            type: number
+            description: "Estimated coverage after writing new tests"
+          improvement:
+            type: number
+            description: "Percentage point improvement in coverage"
+        description: "Coverage improvement summary"
+      deployment_recommendation:
+        type: object
+        properties:
+          status:
+            type: string
+            enum: ["PROCEED WITH DEPLOYMENT", "REVIEW REQUIRED BEFORE DEPLOYMENT", "DO NOT DEPLOY"]
+            description: "Deployment recommendation status"
+          reasoning:
+            type: string
+            description: "Detailed explanation for the deployment recommendation"
+          risk_level:
+            type: string
+            enum: ["low", "medium", "high"]
+            description: "Risk level associated with deploying the current codebase"
+          action_items:
+            type: array
+            items:
+              type: string
+            description: "List of action items to address before deployment (if any)"
+        description: "Deployment recommendation based on test coverage and quality"
+    required:
+      - analysis_summary
+      - coverage_gaps
+      - test_improvements
+      - new_test_suggestions
+      - overall_score
+      - tests_written
+      - final_coverage_estimate
+      - deployment_recommendation
+
+# Optional: Retry logic
+# retry:
+#   max_retries: 3
+#   timeout_seconds: 30
+#   checks:
+#     - type: shell
+#       command: "echo 'Validation passed'"
+#   on_failure: "echo 'Task failed, retrying...'"
