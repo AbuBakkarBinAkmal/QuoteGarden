@@ -181,6 +181,10 @@ Make an issue with your application.
 
 All feedback and contributions are welcome!
 
+## 🧪 Testing
+
+This API is continuously tested via automated workflows to ensure reliability.
+
 ## License
 
 ``` 

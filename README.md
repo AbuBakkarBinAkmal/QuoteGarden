@@ -284,6 +284,10 @@ The generated `test_report.json` contains:
 
 MIT License - See LICENSE file for details
 
+## 🧪 Testing Actions
+
+This repository includes automated testing via GitHub Actions to ensure code quality and test coverage.
+
 ## 🤝 Contributing
 
 1. Fork the repository
