@@ -13,7 +13,7 @@ on:
 
 jobs:
   analyze-coverage:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout repository
@@ -33,18 +33,15 @@ jobs:
       - name: Install jq for webhook script
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Add Goose to PATH
-        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-
       - name: Verify Goose CLI is available
-        run: goose --version
+        run: /home/xgrid/.local/bin/goose --version
 
       - name: Run Test Coverage Recipe
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           TETRATE_API_KEY: ${{ secrets.TETRATE_API_KEY }}
         run: |
-          goose run \
+          /home/xgrid/.local/bin/goose run \
             --recipe recipe.yaml \
             --params project_directory=QuoteGarden \
             --provider tetrate \
