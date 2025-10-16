@@ -30,8 +30,7 @@ jobs:
             --recipe recipe.yaml \
             --params project_directory=QuoteGarden \
             --provider tetrate \
-            --model gpt-5-mini \
-            --with-builtin developer \
+            --model gpt-5 \
             --no-session \
             --quiet 2>&1 | tee goose_output.log
 
