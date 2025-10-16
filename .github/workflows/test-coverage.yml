@@ -23,14 +23,20 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           TETRATE_API_KEY: ${{ secrets.TETRATE_API_KEY }}
+        timeout-minutes: 15
         run: |
-          /home/xgrid/.local/bin/goose run \
+          # Run goose and capture output
+          timeout 900 /home/xgrid/.local/bin/goose run \
             --recipe recipe.yaml \
             --params project_directory=QuoteGarden \
             --provider tetrate \
             --model gpt-5-mini \
             --with-builtin developer \
-            --no-session
+            --no-session \
+            --quiet 2>&1 | tee goose_output.log
+
+          # Extract JSON from output (last valid JSON object)
+          grep -o '{.*}' goose_output.log | tail -1 | jq . > test_report.json 2>/dev/null || echo '{"error": "Failed to parse JSON from goose output"}' > test_report.json
 
       - name: Upload test report
         if: always()
