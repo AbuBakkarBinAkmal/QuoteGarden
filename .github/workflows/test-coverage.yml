@@ -30,15 +30,11 @@ jobs:
         working-directory: QuoteGarden
         run: npm ci
 
-      - name: Install Goose CLI
-        run: |
-          curl -fsSL https://github.com/block/goose/releases/latest/download/goose-linux-x86_64 -o goose
-          chmod +x goose
-          sudo mv goose /usr/local/bin/goose
-          goose --version
-
       - name: Install jq for webhook script
         run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Verify Goose CLI is available
+        run: goose --version
 
       - name: Run Test Coverage Recipe
         env:

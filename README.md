@@ -29,7 +29,7 @@ Automated test coverage analysis and reporting system using Goose AI recipes wit
 
 - Git
 - Node.js 18+ (for QuoteGarden app)
-- Goose CLI
+- **Goose CLI** (must be pre-installed in your environment)
 - GitHub account (for CI/CD)
 - Google Chat webhook URL
 
@@ -41,16 +41,12 @@ Automated test coverage analysis and reporting system using Goose AI recipes wit
    cd GooseTest
    ```
 
-2. **Install Goose CLI**
+2. **Verify Goose CLI is available**
    ```bash
-   # Linux/macOS
-   curl -fsSL https://github.com/block/goose/releases/latest/download/goose-linux-x86_64 -o goose
-   chmod +x goose
-   sudo mv goose /usr/local/bin/goose
-
-   # Verify installation
    goose --version
    ```
+
+   If Goose is not installed, please install it in your environment before proceeding.
 
 3. **Install project dependencies**
    ```bash
@@ -113,8 +109,9 @@ Automated test coverage analysis and reporting system using Goose AI recipes wit
 ### Workflow Steps
 
 1. **Checkout Code**: Clones repository
-2. **Setup Environment**: Installs Node.js, dependencies, Goose CLI, and jq
-3. **Run Recipe**: Executes Goose test coverage recipe
+2. **Setup Environment**: Installs Node.js, dependencies, and jq
+3. **Verify Goose**: Checks Goose CLI is available in environment
+4. **Run Recipe**: Executes Goose test coverage recipe
    - Analyzes codebase structure
    - Reviews existing tests
    - Writes new tests to fill coverage gaps
@@ -256,8 +253,9 @@ The generated `test_report.json` contains:
 ## 🐛 Troubleshooting
 
 ### Workflow fails with "Goose not found"
-- Ensure Goose CLI installation step succeeds
-- Check Goose release URL is correct
+- Ensure Goose CLI is installed in your GitHub Actions runner environment
+- Verify Goose is available in the system PATH
+- Check that the runner has the necessary Goose CLI version
 
 ### "TETRATE_API_KEY not set"
 - Add secret to GitHub repository settings
