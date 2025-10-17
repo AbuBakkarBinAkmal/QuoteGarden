@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  goose-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: goose-test-coverage
+    environment:
+      # Goose configuration via environment variables (no keyring needed)
+      - GOOSE_PROVIDER=tetrate
+      - GOOSE_MODEL=gpt-5
+      - GOOSE_HOME=/root/.goose
+      # API Keys - use .env file or pass directly
+      - TETRATE_API_KEY=${TETRATE_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    volumes:
+      # Mount the repository for live updates
+      - .:/workspace
+      # Exclude node_modules to use container's version
+      - /workspace/QuoteGarden/node_modules
+    stdin_open: true
+    tty: true
+    command: goose run --recipe recipe.yaml --no-session

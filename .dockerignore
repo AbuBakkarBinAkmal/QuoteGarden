@@ -1,0 +1,25 @@
+# Git files
+.git
+.gitignore
+
+# Node modules (will be installed in container)
+QuoteGarden/node_modules
+node_modules
+
+# Coverage and test output
+coverage
+*.log
+coverage_report.*
+jest_output.txt
+webhook_response.txt
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
