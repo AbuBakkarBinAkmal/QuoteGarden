@@ -34,7 +34,7 @@ RUN npm install
 WORKDIR /workspace
 
 # Set environment variables
-ENV PATH="/usr/local/bin:${PATH}"
+ENV PATH="/root/.local/bin:/usr/local/bin:${PATH}"
 ENV GOOSE_HOME="/root/.goose"
 
 # Default command runs the recipe
