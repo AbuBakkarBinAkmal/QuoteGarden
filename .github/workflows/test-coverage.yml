@@ -17,11 +17,7 @@ jobs:
         run: docker build -t goose-test-coverage .
 
       - name: Run Goose recipe in Docker
-        env:
-          TETRATE_API_KEY: ${{ secrets.TETRATE_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           docker run --rm \
-            -e TETRATE_API_KEY="${TETRATE_API_KEY}" \
-            -e ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY}" \
+            -e TETRATE_API_KEY="sk-c7d1f9d2fb8ff04a.fqtpodxehpbshIaH8hj/vw2REFRo5ubGaAuH1mRR7ha6WqijZgGCYNMkUIa7d7HVFp6Ypl81q0rbgR/9nT4/rA==" \
             goose-test-coverage
