@@ -2,10 +2,17 @@ version: 1.0.0
 title: Run Tests and Report Coverage via Webhook
 description: A reusable recipe to run project tests, gather coverage metrics, and optionally post a formatted coverage/readiness report to a chat webhook. Works across common stacks by detecting the test tooling and adapting commands.
 instructions: |-
-  Identify the project’s language and test framework (e.g., Node/Jest, Python/pytest, Go, Java). Install dependencies if needed, then run the test suite with coverage enabled using the project’s standard command (e.g., npx jest --coverage --runInBand, pytest --cov, go test -cover). Ensure deterministic runs (disable watch mode, prefer serial when flaky) and address trivial blockers (e.g., missing helper files or mocks) so tests complete. If the test run surfaces environment-related noise (e.g., missing DB URI), either provide safe defaults or mock integrations to keep the run clean.
+  Identify the project's language and test framework (e.g., Node/Jest, Python/pytest, Go, Java). Install dependencies if needed, then run the test suite with coverage enabled using the project's standard command (e.g., npx jest --coverage --runInBand, pytest --cov, go test -cover). Ensure deterministic runs (disable watch mode, prefer serial when flaky) and address trivial blockers (e.g., missing helper files or mocks) so tests complete. If the test run surfaces environment-related noise (e.g., missing DB URI), either provide safe defaults or mock integrations to keep the run clean.
   USE THE PROJECT'S STANDARD COMMAND. NEVER USE SUDO.
-  Parse the coverage output (e.g., coverage-summary.json or CLI output) and compile a concise report including statements, branches, functions, and lines coverage, plus a brief breakdown of key areas and the test pass/fail count. Include a production readiness recommendation based on results and coverage patterns (e.g., high coverage but low branch coverage in critical paths may warrant staging-not-production). If requested, send the report to a webhook (e.g., Google Chat) using curl with a JSON payload that follows the target channel's expected format and includes a timestamp. Note any non-standard tools or endpoints used (e.g., curl, Google Chat webhook URL) and honor any requested output style or fields.
-  WHEN DONE, SEND THE REPORT TO THE WEBHOOK. DO NOT ASK TO SEND THE REPORT TO THE WEBHOOK. JUST SEND IT.
+  Parse the coverage output (e.g., coverage-summary.json or CLI output) and compile a concise report including statements, branches, functions, and lines coverage, plus a brief breakdown of key areas and the test pass/fail count. Include a production readiness recommendation based on results and coverage patterns (e.g., high coverage but low branch coverage in critical paths may warrant staging-not-production).
+
+  WEBHOOK URL: https://chat.googleapis.com/v1/spaces/AAAAkrnSh8o/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=CMNM37mIP7DlpO3DAC4kPWbzDljk22sjlKvKVw4q7NI
+
+  WHEN DONE, SEND THE REPORT TO THE WEBHOOK ABOVE. DO NOT ASK TO SEND THE REPORT. JUST SEND IT. Use curl with a JSON payload formatted for Google Chat with the following structure:
+  {
+    "text": "<coverage report content formatted as markdown or plain text>"
+  }
+  Include a timestamp in the report content.
 prompt: |-
   Run the project's test suite with coverage enabled, analyze the results, and generate a comprehensive coverage report. If a webhook URL is provided, post the formatted report to the webhook. Assess production readiness based on coverage metrics and test results.
 
