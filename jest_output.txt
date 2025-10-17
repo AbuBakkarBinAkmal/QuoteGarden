@@ -1,0 +1,60 @@
+PASS __tests__/quote_utils_errors.test.js
+  ● Console
+
+    console.log
+      MongooseError: The `uri` parameter to `openUri()` must be a string, got "undefined". Make sure the first parameter to `mongoose.connect()` or `mongoose.createConnection()` is a string.
+          at NativeConnection.Object.<anonymous>.Connection.openUri (/home/xgrid/GooseTest/QuoteGarden/node_modules/mongoose/lib/connection.js:651:11)
+          at /home/xgrid/GooseTest/QuoteGarden/node_modules/mongoose/lib/index.js:341:10
+          at /home/xgrid/GooseTest/QuoteGarden/node_modules/mongoose/lib/helpers/promiseOrCallback.js:31:5
+          at new Promise (<anonymous>)
+          at promiseOrCallback (/home/xgrid/GooseTest/QuoteGarden/node_modules/mongoose/lib/helpers/promiseOrCallback.js:30:10)
+          at Mongoose.connect (/home/xgrid/GooseTest/QuoteGarden/node_modules/mongoose/lib/index.js:340:10)
+          at Object.<anonymous> (/home/xgrid/GooseTest/QuoteGarden/src/loaders/database.js:5:4)
+          at Runtime._execModule (/home/xgrid/GooseTest/QuoteGarden/node_modules/jest-runtime/build/index.js:1219:24)
+          at Runtime._loadModule (/home/xgrid/GooseTest/QuoteGarden/node_modules/jest-runtime/build/index.js:829:12)
+          at Runtime.requireModule (/home/xgrid/GooseTest/QuoteGarden/node_modules/jest-runtime/build/index.js:680:10)
+          at Runtime.require [as requireModuleOrMock] (/home/xgrid/GooseTest/QuoteGarden/node_modules/jest-runtime/build/index.js:850:21)
+          at Object.<anonymous> (/home/xgrid/GooseTest/QuoteGarden/src/models/Quote.js:1:18)
+          at Runtime._execModule (/home/xgrid/GooseTest/QuoteGarden/node_modules/jest-runtime/build/index.js:1219:24)
+          at Runtime._loadModule (/home/xgrid/GooseTest/QuoteGarden/node_modules/jest-runtime/build/index.js:829:12)
+          at Runtime.requireModule (/home/xgrid/GooseTest/QuoteGarden/node_modules/jest-runtime/build/index.js:680:10)
+          at Runtime.requireModuleOrMock (/home/xgrid/GooseTest/QuoteGarden/node_modules/jest-runtime/build/index.js:850:21)
+
+      at src/loaders/database.js:12:29
+
+PASS test/controllers.test/controllers.test.js
+PASS test/utils.test/errors.test.js
+PASS __tests__/calculator.test.js
+PASS test/services.test/quote_extra.test.js
+PASS test/services.test/quote.test.js
+PASS test/utils.test/utils.test.js
+PASS test/middlewares.test/error_handler.test.js
+PASS test/utils.test/utils_edge.test.js
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   98.86 |    61.76 |   94.44 |   98.84 |                   
+ api/controllers   |     100 |    44.44 |     100 |     100 |                   
+  author.js        |     100 |      100 |     100 |     100 |                   
+  genre.js         |     100 |      100 |     100 |     100 |                   
+  quote.js         |     100 |        0 |     100 |     100 | 6-33              
+ api/middlewares   |     100 |      100 |     100 |     100 |                   
+  error-handler.js |     100 |      100 |     100 |     100 |                   
+ configs           |     100 |    83.33 |     100 |     100 |                   
+  index.js         |     100 |    83.33 |     100 |     100 | 4                 
+ loaders           |   83.33 |      100 |      50 |   83.33 |                   
+  database.js      |   83.33 |      100 |      50 |   83.33 | 11                
+ models            |     100 |      100 |     100 |     100 |                   
+  Quote.js         |     100 |      100 |     100 |     100 |                   
+ services          |     100 |    22.22 |     100 |     100 |                   
+  quote.js         |     100 |    22.22 |     100 |     100 | 18-51             
+ utils             |     100 |      100 |     100 |     100 |                   
+  errors.js        |     100 |      100 |     100 |     100 |                   
+  utils.js         |     100 |      100 |     100 |     100 |                   
+-------------------|---------|----------|---------|---------|-------------------
+
+Test Suites: 9 passed, 9 total
+Tests:       50 passed, 50 total
+Snapshots:   0 total
+Time:        0.66 s, estimated 1 s
+Ran all test suites.

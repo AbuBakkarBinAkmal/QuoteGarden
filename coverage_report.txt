@@ -1,0 +1,28 @@
+Coverage Report — 2025-10-16T23:51:39Z
+
+Test Results
+- Suites: 9 passed, 9 total
+- Tests:        50 passed, 50 total
+- Snaps:    0 total
+- Time:          0.66 s, estimated 1 s
+
+Coverage Totals (all instrumented files)
+- Statements: 100%
+- Branches:   76.31%
+- Functions:  100%
+- Lines:      100%
+
+App Code Coverage (per Jest summary)
+- Statements: |
+- Branches:   |
+- Functions:  |
+- Lines:      |
+
+Key Areas (low branch coverage)
+- None ≤50%
+
+Notable Signals
+- DB loader emitted a Mongoose connect warning during tests; consider mocking the DB URI/connection to keep unit tests hermetic.
+
+Production Readiness
+High line/statement coverage overall, but branch coverage is notably low in critical request paths (e.g., controllers/quote.js and services/quote.js). Recommend: raise branch coverage to ≥80% for controllers/services, add tests for error/edge paths, and stub DB connections in unit tests. OK for staging; hold production until branch gaps are addressed.
